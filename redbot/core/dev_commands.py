@@ -339,13 +339,22 @@ class Dev(commands.Cog):
     async def mock_msg(self, ctx, user: discord.Member, *, content: str):
         """Dispatch a message event as if it were sent by a different user.
 
-        Only reads the raw content of the message. Attachments, embeds etc. are
-        ignored.
+        Embeds are ignored but attachments are allowed.
         """
         old_author = ctx.author
         old_content = ctx.message.content
         ctx.message.author = user
         ctx.message.content = content
+        
+        image = None 
+        if ctx.message.attachments:
+            attachment = ctx.message.attachments[0]
+            image = attachment.proxy_url 
+        
+        if image:
+            image = discord.File(image, filename="previousattachments.png")
+            ctx.message.attachments = []
+            ctx.message.attachments.append(image)
 
         ctx.bot.dispatch("message", ctx.message)
 
